@@ -1,0 +1,52 @@
+# Finding all of highlighted text from pdf using pdfplumber
+
+import pdfplumber
+
+pdf = pdfplumber.open("/Users/mazz/Downloads/OneDrive_1_30-09-2022/PDF_1/Anant Udyog LLP - June 2020.pdf")
+n = len(pdf.pages)
+
+# creating a dictionary of pages
+p = {}
+
+for i in range(n):
+    key = i
+    p[key] = pdf.pages[i]
+
+highlights = []
+
+
+# loop over all the pages in the file
+for i in range(n):
+    # move to page i
+    page = p[i]
+   # iterate through all the annotations
+    #print(len(page.annots))
+    for annotation in page.annots: # a problem with .annot is that it takes in urls and emails (anything that is clickable inside the pdf)
+        # annotation is a dictionary containing `x0`, `x1`, `y0`, `y1`
+        if annotation['uri'] == None: # make sure that annottion is not due to it being a url
+            bbox = (annotation['x0']+5, page.height - annotation['y1'], annotation['x1']-5, page.height - annotation['y0'])
+            #print(bbox)
+            #bbox = (0, 0, page.width, page.height)
+            temp_high_page = page.crop(bbox=bbox, strict=False, relative=False)
+            temp_high_text = temp_high_page.extract_text()
+            if temp_high_text != '':
+                highlights.append((temp_high_text, annotation['y0'], i+1)) # second tuple entry will help determine if the text is on the same line
+
+def make_lined_list(list):
+    result = []
+    tuples = []
+    for data in list:
+        if data[1] not in tuples:
+            tuples.append(data[1])
+    for tuple in tuples:
+        sub_result = []
+        for data in list:
+            if data[1] == tuple:
+                sub_result.append(data[0])
+        result.append(sub_result)
+    return result
+
+final_result = make_lined_list(highlights)
+
+
+print(final_result)

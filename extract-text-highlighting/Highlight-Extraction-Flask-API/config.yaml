@@ -1,0 +1,19 @@
+API performs text highlighting
+
+---
+tags:
+- Hightlight Extraction
+consumes:
+- multipart/form-data
+parameters:
+- name: filename
+  key: filename
+  in: formData
+  type: file
+  required: true
+  description: Extracting highlighted text from the given file
+responses:
+  500:
+    description: Internal server failed.
+  200:
+    description: Uploaded successfully.
